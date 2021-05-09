@@ -14,31 +14,28 @@ const PORT = +process.env.PORT || 3000;
 
 const server = http.createServer(router);
 
-router.use((/*IncomingMessage*/request, /*ServerResponse*/ response) => {
+router.use((request, response) => {
     console.log(request.method, request.url);
 });
 
-router.use((/*IncomingMessage*/request, /*ServerResponse*/response) => {
-   response.writeHead(200, {
-       'Content-Type': 'text/html',
-       'Set-Cookie': 'test=Hello World!'
-   });
+router.use((request, response) => {
+   response.writeHead(200, {'Content-Type': 'text/html'});
 });
 
-router.use('/test', (/*IncomingMessage*/request, /*ServerResponse*/ response) => {
+router.use('/test', (request, response) => {
     console.log('This should only print on /test');
 });
 
-router.get('/', (/*IncomingMessage*/request, /*ServerResponse*/response) => {
+router.get('/', (request, response) => {
     response.end(fs.readFileSync(__dirname + '/index.html'));
 });
 
-router.post('/action', (/*IncomingMessage*/request, /*ServerResponse*/response) => {
+router.post('/action', (request, response) => {
     response.end(fs.readFileSync(__dirname + '/result.html'));
 });
 
 // Catch all GET
-router.get('', (/*IncomingMessage*/request, /*ServerResponse*/response) => {
+router.get('', (request, response) => {
     response.end("<h1>404</h1>");
 });
 
