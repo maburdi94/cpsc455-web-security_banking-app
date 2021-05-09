@@ -39,8 +39,8 @@ router.get('/', (request, response) => {
     response.end(fs.readFileSync(__dirname + '/index.html'));
 });
 
-router.post('/action', (request, response) => {
-    response.end(fs.readFileSync(__dirname + '/result.html'));
+router.post('/action', async (/*IncomingMessage*/request, /*ServerResponse*/response) => {
+    response.end(await fs.promises.readFile(__dirname + '/result.html'));
 });
 
 // Catch all GET
