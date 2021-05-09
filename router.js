@@ -16,14 +16,14 @@ let proto = module.exports = function(options = {}) {
 }
 
 
-proto.handler = function(/*IncomingMessage*/request, /*ServerResponse*/response) {
+proto.handler = async function(/*IncomingMessage*/request, /*ServerResponse*/response) {
     let idx = 0;
     let stack = this.stack;
     let done;
 
     while (!done && idx < stack.length) {
         let fn = stack[idx++];
-        fn(request, response, (err) => {
+        await fn(request, response, (err) => {
             if (err) throw err;
             else done = true;
         });
