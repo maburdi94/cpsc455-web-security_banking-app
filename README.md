@@ -39,6 +39,11 @@ router.get('/', (request, response) => {
     response.end(fs.readFileSync(__dirname + '/index.html'));
 });
 
+router.get('/color/:favoriteColor', (/*IncomingMessage*/request, /*ServerResponse*/response) => {
+    let color = request.params.favoriteColor;
+    response.end("<h1 style='color: " + color + "'>" + color + "</h1>");
+});
+
 router.post('/action', async (request, response) => {
     response.end(await fs.promises.readFile(__dirname + '/result.html'));
 });
