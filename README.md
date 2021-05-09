@@ -7,7 +7,7 @@ const http = require('http');
 const fs = require('fs');
 
 const Router = require('./router');
-const router = new Router();
+const router = Router();
 
 const PORT = +process.env.PORT || 3000;
 
