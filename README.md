@@ -26,6 +26,15 @@ router.use('/test', (request, response) => {
     console.log('This should only print on /test');
 });
 
+router.use((request, response) => {
+    return new Promise((resolve, reject) => {
+       setTimeout(function () {
+           console.log('It even works with async');
+           resolve();
+       }, 5000);
+    });
+});
+
 router.get('/', (request, response) => {
     response.end(fs.readFileSync(__dirname + '/index.html'));
 });
