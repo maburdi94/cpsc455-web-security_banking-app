@@ -40,7 +40,7 @@ router.get('/', (request, response) => {
 });
 
 
-// Using url and query params
+// Using url and query params (e.g. /color/blue?items=apples&items=oranges&items=eggs)
 router.get('/color/:favoriteColor', (request, response) => {
     let color = request.params.favoriteColor;
     let animal = request.query.get('animal');
