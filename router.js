@@ -35,7 +35,8 @@ proto.use = function(fn) {
         let re = pathToRegex(fn);
         fn = [].slice.call(arguments, 1)[0];
         this.stack.push(function (req, res) {
-            if (re.exec(req.url)) {
+            let {pathname} = new URL(req.url, `http://${req.headers.host}`);
+            if (re.exec(pathname)) {
                 fn(req, res);   // call route handler
             }
         });
@@ -48,9 +49,12 @@ methods.forEach(function (method) {
    proto[method] = function(path, fn) {
        let re = pathToRegex(path, path);
        this.stack.push(function (req, res, done) {
-           let match = re.exec(req.url);
+           let {searchParams, pathname} = new URL(req.url, `http://${req.headers.host}`);
+           let match = re.exec(pathname);
            if (match && req.method.toLowerCase() === method) {
-               req.params = Object.assign({}, req.params, match.groups);  // set params from RegExp match
+               req.query = searchParams;    // set querystring param
+               req.params = Object.assign({}, req.params, match.groups);  // set path params
+
                fn(req, res);   // call route handler
                done();         // route match should end call chain
            }
