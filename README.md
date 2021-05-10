@@ -39,9 +39,17 @@ router.get('/', (request, response) => {
     response.end(fs.readFileSync(__dirname + '/index.html'));
 });
 
+
+// Using url and query params
 router.get('/color/:favoriteColor', (request, response) => {
     let color = request.params.favoriteColor;
-    response.end("<h1 style='color: " + color + "'>" + color + "</h1>");
+    let animal = request.query.get('animal');
+    let items = request.query.getAll('items');
+    
+    response.end(`
+        <h1><span style='color: ${color}'>${color}</span> <span>${animal}</span></h1>
+        <ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>
+    `);
 });
 
 router.post('/action', async (request, response) => {
