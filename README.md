@@ -1,5 +1,11 @@
 # node-router
-A simple Express-like router. The best part is there's no Express.
+A light-weight pure Node Express-like request router.
+
+- Express-like middleware
+- Handles url parameters
+- Handles querystring parameters
+- Handles all HTTP methods defined in Node http.METHODS
+- Support async/await
 
 ## Example
 ```javascript
