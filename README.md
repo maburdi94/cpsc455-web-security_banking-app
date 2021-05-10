@@ -1,5 +1,4 @@
-# node-router
-A light-weight pure Node Express-like request router.
+# Light-weight pure Node Express-like request router.
 
 - Express-like middleware
 - Handles url parameters
