@@ -7,6 +7,8 @@ A light-weight pure Node Express-like request router.
 - Handles all HTTP methods defined in Node http.METHODS
 - Support async/await
 
+Only 52 SLOC (1.89 KB)
+
 ## Example
 ```javascript
 const http = require('http');
