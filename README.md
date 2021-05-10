@@ -51,7 +51,7 @@ router.get('/', (request, response) => {
 // Using url and query params (e.g. /color/blue?animal=cat&items=apples&items=oranges&items=eggs)
 router.get('/color/:favoriteColor', (request, response) => {
     let color = request.params.favoriteColor;
-    let animal = request.query.get('animal');
+    let animal = request.query.get('animal');   // query is a URLSearchParams object (https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)
     let items = request.query.getAll('items');
     
     response.end(`
