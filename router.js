@@ -19,14 +19,13 @@ let proto = module.exports = function(options = {}) {
 proto.handler = async function(/*IncomingMessage*/request, /*ServerResponse*/response) {
     let idx = 0;
     let stack = this.stack;
-    let done;
 
-    while (!done && idx < stack.length) {
+    next();
+
+    function next() {
         let fn = stack[idx++];
-        await fn(request, response, (err) => {
-            if (err) throw err;
-            else done = true;
-        });
+        if (!fn) return;
+        fn(request, response, next);
     }
 }
 
@@ -34,10 +33,10 @@ proto.use = function(fn) {
     if (typeof fn !== 'function') {
         let re = pathToRegex(fn);
         fn = [].slice.call(arguments, 1)[0];
-        this.stack.push(function (req, res) {
+        this.stack.push(function (req, res, next) {
             let {pathname} = new URL(req.url, `http://${req.headers.host}`);
             if (re.exec(pathname)) {
-                fn(req, res);   // call route handler
+                fn(req, res, next);   // call route handler
             }
         });
     } else {
@@ -48,7 +47,7 @@ proto.use = function(fn) {
 methods.forEach(function (method) {
    proto[method] = function(path, fn) {
        let re = pathToRegex(path, path);
-       this.stack.push(function (req, res, done) {
+       this.stack.push(function (req, res, next) {
            let {searchParams, pathname} = new URL(req.url, `http://${req.headers.host}`);
            let match = re.exec(pathname);
            if (match && req.method.toLowerCase() === method) {
@@ -56,7 +55,9 @@ methods.forEach(function (method) {
                req.params = Object.assign({}, req.params, match.groups);  // set path params
 
                fn(req, res);   // call route handler
-               done();         // route match should end call chain
+           }
+           else {
+               next();
            }
        });
    }
