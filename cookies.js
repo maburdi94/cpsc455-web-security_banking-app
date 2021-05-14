@@ -11,7 +11,6 @@ module.exports = function(options = {}) {
 
     function cookie(req, res, next) {
         req.cookie = parseCookie(req.headers['cookie']);
-        console.log('cookies');
         next();
     }
 

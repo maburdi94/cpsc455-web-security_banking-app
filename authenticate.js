@@ -1,6 +1,9 @@
 
 
-module.exports = function(accounts = {}) {
+module.exports = function(opts = {}) {
+
+    let accounts = opts.db || {};
+    let key = opts.key || 'credentials';
 
     function authenticate(req, res, next) {
 
@@ -13,14 +16,15 @@ module.exports = function(accounts = {}) {
 
             let [username, password] = text.split(':');
 
-            console.log('authentication')
-
             if (accounts[username] === password) {
+                req[key] = {username, password};
+
                 next();
                 return;
             }
         }
 
+        res.statusCode = 401;
         res.setHeader('WWW-Authenticate', "Basic realm=\"Access to website\", charset=\"UTF-8\"");
         res.end('<h1>401 Unauthorized</h1>');
     }

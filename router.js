@@ -1,22 +1,54 @@
 
+const http = require('http');
+const {createReadStream} = require('fs');
+
 const methods = require('http').METHODS.map(method => method.toLowerCase());
 const pathToRegex = (path, exact = true) => new RegExp((exact ? "^" : "") + path.replace(/\//g, "\\/").replace(/:(\w+)/g, "(?<$1>.+)") + (exact ? "$" : ""));
+
+
+Object.setPrototypeOf(Request.prototype, http.IncomingMessage.prototype);
+Object.setPrototypeOf(Response.prototype, http.ServerResponse.prototype);
+
+/*
+* Object wrapper around IncomingMessage.
+*/
+function Request(req) {
+    Object.setPrototypeOf(req, Request.prototype);
+    req.constructor = Request;
+    return req;
+}
+
+/*
+* Object wrapper around ServerResponse.
+*/
+function Response(res) {
+    Object.setPrototypeOf(res, Response.prototype);
+    res.constructor = Response;
+    return res;
+}
+
+
+Response.prototype.sendFile = function (fileName) {
+    createReadStream(fileName).pipe(this);
+}
+
+
 
 
 let proto = module.exports = function(options = {}) {
 
     function router(req, res) {
-        router.handler(req,res);
+        router.handler(Request(req),Response(res));
     }
 
-    router.__proto__ = proto;
+    Object.setPrototypeOf(router, proto);
     router.stack = [];
 
     return router;
 }
 
 
-proto.handler = async function(/*IncomingMessage*/request, /*ServerResponse*/response) {
+proto.handler = async function(/*Request*/request, /*Response*/response) {
     let idx = 0;
     let stack = this.stack;
 

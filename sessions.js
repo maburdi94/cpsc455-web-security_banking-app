@@ -28,7 +28,6 @@ SessionStore.prototype.delete = function (id) {
 module.exports = function(options = {}) {
 
     function session(req, res, next) {
-        console.log('sessions');
         next();
     }
 
