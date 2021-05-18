@@ -2,34 +2,38 @@
 const crypto = require("crypto");
 
 
-function SessionStore() {
-    this.sessions = {};
-}
-
-SessionStore.prototype.create = function (value = {}) {
-    let id = crypto.randomBytes(16).toString("base64");
-    return this.sessions[id] = value;
-};
-
-SessionStore.prototype.set = function (id, value) {
-    let session = this.sessions[id];
-    Object.assign(session.value, value);
-};
-
-SessionStore.prototype.delete = function (id) {
-    delete this.sessions[id];
-};
+let sessions = {};
 
 
-
-
-
-
-module.exports = function(options = {}) {
+let proto = module.exports = function(options = {}) {
 
     function session(req, res, next) {
+
+        let sessionId = req.cookie['sessionId'];
+
+        if (sessionId in sessions) {
+            let session = sessions[sessionId];
+
+            if (Date.now() < session.expire) {
+                session.expire = Date.now() + 180000; // touch extend 3 minutes
+                req.session = session;
+            } else {
+                delete sessions[sessionId];
+            }
+        }
+
         next();
     }
 
     return session;
+}
+
+
+proto.create = function () {
+    let id = crypto.randomBytes(16).toString("base64");
+    return sessions[id] = {id, value: {}, expire: Date.now() + 180000};
+};
+
+proto.delete = function (id) {
+    delete sessions[id];
 }

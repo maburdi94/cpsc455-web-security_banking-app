@@ -1,6 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <title>Accounts</title>
+    <style>
+        html, body { margin: 0; padding: 0;}
+        h1,h2,h3,h4 {padding: 0 1em;}
+        form#new_account {
+            display: inline-block;
+            border: 1px solid black;
+            background-color: rgb(42, 76, 92);
+            padding: .5em 2em 2em;
+            color: white;
+        }
+    </style>
+</head>
 <body>
 <h1>Accounts</h1>
+
+
+<ul id="accounts"></ul>
+
+
+<form id="new_account" action="/api/accounts" method="post">
+    <h2>Create a new account:</h2>
+    <label for="account_type">Account type: </label>
+    <select id="account_type" name="type" required>
+        <option value="" disabled selected></option>
+        <option value="checking">Checking</option>
+        <option value="savings">Savings</option>
+    </select><br>
+    <label for="account_name">Account name: </label>
+    <input id="account_name" name="name" required/><br>
+    <label for="initial_amount">Initial Amount: </label>
+    <input id="initial_amount" name="amount" value="0" type="number"/><br>
+    <button>Submit </button>
+</form>
+
+<br>
+
+<form id="logout" action="/logout" method="post">
+    <button>Logout</button>
+</form>
+
+<script>
+    'use strict';
+
+    function el(tag, attrs, text) {
+        let el = document.createElement(tag);
+        if (attrs) Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+        if (text) el.innerText = text;
+        return el;
+    }
+
+    fetch('http://localhost:3000/api/accounts')
+        .then(res => res.json())
+        .then(data => {
+           document.querySelector('#accounts')
+               .append(...data.map((d) => {
+                   let li = el('li');
+                   let a = el('a', {href: `/accounts/${d.accountNumber}`}, d.name);
+                   li.append(a);
+                   return li;
+               }));
+        });
+</script>
 </body>
 </html>

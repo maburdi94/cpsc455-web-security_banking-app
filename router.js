@@ -1,38 +1,5 @@
 
-const http = require('http');
-const {createReadStream} = require('fs');
-
-const methods = require('http').METHODS.map(method => method.toLowerCase());
-const pathToRegex = (path, exact = true) => new RegExp((exact ? "^" : "") + path.replace(/\//g, "\\/").replace(/:(\w+)/g, "(?<$1>.+)") + (exact ? "$" : ""));
-
-
-Object.setPrototypeOf(Request.prototype, http.IncomingMessage.prototype);
-Object.setPrototypeOf(Response.prototype, http.ServerResponse.prototype);
-
-/*
-* Object wrapper around IncomingMessage.
-*/
-function Request(req) {
-    Object.setPrototypeOf(req, Request.prototype);
-    req.constructor = Request;
-    return req;
-}
-
-/*
-* Object wrapper around ServerResponse.
-*/
-function Response(res) {
-    Object.setPrototypeOf(res, Response.prototype);
-    res.constructor = Response;
-    return res;
-}
-
-
-Response.prototype.sendFile = function (fileName) {
-    createReadStream(fileName).pipe(this);
-}
-
-
+const {methods, pathToRegex, Request, Response, compose} = require('./utils');
 
 
 let proto = module.exports = function(options = {}) {
@@ -42,13 +9,15 @@ let proto = module.exports = function(options = {}) {
     }
 
     Object.setPrototypeOf(router, proto);
+
     router.stack = [];
+    router.strict = options.strict || false;
 
     return router;
 }
 
 
-proto.handler = async function(/*Request*/request, /*Response*/response) {
+proto.handler = function(/*Request*/request, /*Response*/response) {
     let idx = 0;
     let stack = this.stack;
 
@@ -61,34 +30,51 @@ proto.handler = async function(/*Request*/request, /*Response*/response) {
     }
 }
 
-proto.use = function(fn) {
+proto.use = function(fn, ...args) {
     if (typeof fn !== 'function') {
         let re = pathToRegex(fn);
-        fn = [].slice.call(arguments, 1)[0];
+        fn = compose(args)
         this.stack.push(function (req, res, next) {
             let {pathname} = new URL(req.url, `http://${req.headers.host}`);
-            if (re.exec(pathname)) {
+            let match = re.exec(pathname);
+
+            if (match) {
                 fn(req, res, next);   // call route handler
+            } else {
+                next();
             }
         });
     } else {
+        fn = compose([fn, ...args]);
         this.stack.push(fn);
     }
 }
 
+
 methods.forEach(function (method) {
-   proto[method] = function(path, fn) {
-       let re = pathToRegex(path, path);
+   proto[method] = function(path, ...args) {
+       let options = {
+           strict: proto.strict
+       };
+
+       // Second argument is options
+       if (typeof args[0] !== 'function') {
+           options = Object.assign(options, args.shift());
+       }
+
+       let re = pathToRegex(path, options.strict);
+       let fn = compose(args);
+
        this.stack.push(function (req, res, next) {
            let {searchParams, pathname} = new URL(req.url, `http://${req.headers.host}`);
            let match = re.exec(pathname);
+
            if (match && req.method.toLowerCase() === method) {
                req.query = searchParams;    // set querystring param
                req.params = Object.assign({}, req.params, match.groups);  // set path params
 
-               fn(req, res);   // call route handler
-           }
-           else {
+               fn(req, res, next);   // call route handler
+           } else {
                next();
            }
        });
