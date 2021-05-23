@@ -1,4 +1,4 @@
-
+'use strict';
 
 module.exports = function(opts = {}) {
 
@@ -22,11 +22,14 @@ module.exports = function(opts = {}) {
                 next();
                 return;
             }
+        } else if (req.session) {
+            next();
+            return;
         }
 
-        res.statusCode = 401;
-        res.setHeader('WWW-Authenticate', "Basic realm=\"Access to website\", charset=\"UTF-8\"");
-        res.end('<h1>401 Unauthorized</h1>');
+        res.statusCode = 302;
+        res.setHeader('Location', '/login');
+        res.end();
     }
 
     return authenticate;

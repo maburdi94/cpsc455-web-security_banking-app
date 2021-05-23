@@ -39,6 +39,7 @@ proto.use = function(fn, ...args) {
             let match = re.exec(pathname);
 
             if (match) {
+                req.params = Object.assign({}, req.params, match.groups);  // set path params
                 fn(req, res, next);   // call route handler
             } else {
                 next();

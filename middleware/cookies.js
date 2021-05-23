@@ -1,3 +1,5 @@
+'use strict';
+
 
 const split = (str, delim='=') => {
     let index = str.indexOf(delim);
