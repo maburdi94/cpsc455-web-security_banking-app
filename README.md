@@ -1,31 +1,73 @@
-# CPSC 455 Assignment 2 Submission
+# Light-weight pure Node Express-like request router.
 
-## Members
-Michael Burdi &emsp; <span style="color: rgb(90,180,255)">maburdi@csu.fullerton.edu</span>
-
-
-## How to execute
-1. In the terminal, in the project directory, run `npm start`
-2. The server should be running on http://localhost:3000. If another process is running on port 3000 set PORT in environment variables before the script (i.e. PORT=3001 npm start)
-3. There is a JSON /services/db.json in the project directory that has accounts. Use one to log in.
-
-## Security Detail
-* Using a custom function escapeHTML (located in /utils.js) which escape the string of HTML before it is used in the views (located in /views directory).
-* CSP headers set in /app.js to protect against resources loading from different origins.
-* Using session authentication with 3 minute inactive expiration for broken authentication exploits.
-* Using httpOnly cookie values (see /app.js for example)
-* Parsing user input and proper HTML input types (e.g. &lt;input type=number.../&gt;) to ensure values are not exploitable for XSS.
+- Express-like middleware
+- Handles url parameters
+- Handles querystring parameters
+- Handles all HTTP methods defined in Node http.METHODS
+- Support async/await
 
 
-## Implementation Detail
-* Using strict mode to catch common Javascript code mistakes.
-* Login and registration pages
-* Accounts withdraw and deposit and create new accounts
-* A singleton is created for the Bank service which handles the banking logic
+## Example
+```javascript
+const http = require('http');
+const fs = require('fs');
+
+const Router = require('./router');
+const router = Router();
+
+const PORT = +process.env.PORT || 3000;
 
 
-## Unfinished
-* Transfer money between accounts
-* Delete accounts and customers
-* Implement bank customers and accounts in a real database
+const server = http.createServer(router);
 
+router.use((request, response) => {
+    console.log(request.method, request.url);
+});
+
+router.use((request, response) => {
+   response.writeHead(200, {'Content-Type': 'text/html'});
+});
+
+router.use('/test', (request, response) => {
+    console.log('This should only print on /test');
+});
+
+router.use((request, response) => {
+    return new Promise((resolve, reject) => {
+       setTimeout(function () {
+           console.log('It even works with async');
+           resolve();
+       }, 5000);
+    });
+});
+
+router.get('/', (request, response) => {
+    response.end(fs.readFileSync(__dirname + '/index.html'));
+});
+
+
+// Using url and query params (e.g. /color/blue?animal=cat&items=apples&items=oranges&items=eggs)
+router.get('/color/:favoriteColor', (request, response) => {
+    let color = request.params.favoriteColor;
+    let animal = request.query.get('animal');   // query is a URLSearchParams object (https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)
+    let items = request.query.getAll('items');
+    
+    response.end(`
+        <h1><span style='color: ${color}'>${color}</span> <span>${animal}</span></h1>
+        <ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>
+    `);
+});
+
+router.post('/action', async (request, response) => {
+    response.end(await fs.promises.readFile(__dirname + '/result.html'));
+});
+
+// Catch all GET
+router.get('', (request, response) => {
+    response.end("<h1>404</h1>");
+});
+
+server.listen(PORT, () => {
+    console.log(`Listening at http://localhost:${PORT}`);
+});
+```
