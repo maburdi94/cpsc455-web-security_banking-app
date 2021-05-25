@@ -1,9 +1,7 @@
 
 const http = require('http');
-const querystring = require('querystring');
-const {createReadStream} = require('fs');
 
-module.exports.methods = require('http').METHODS.map(method => method.toLowerCase());
+module.exports.methods = http.METHODS.map(method => method.toLowerCase());
 module.exports.pathToRegex = (path, exact = false) => new RegExp((exact ? "^" : "") + path.replace(/\//g, "\\/").replace(/:(\w+)/g, "(?<$1>[^/]+)") + (exact ? "$" : ""));
 
 
@@ -17,102 +15,6 @@ module.exports.escapeHTML = str => str.replace(/[&<>'"]/g,
         '"': '&quot;'
     }[tag]));
 
-
-/*
-* Object wrapper around IncomingMessage.
-*/
-function Request(req) {
-    Object.setPrototypeOf(req, Request.prototype);
-    req.constructor = Request;
-    return req;
-}
-
-module.exports.Request = Request;
-
-
-/*
-* Object wrapper around ServerResponse.
-*/
-function Response(res) {
-    Object.setPrototypeOf(res, Response.prototype);
-    res.constructor = Response;
-    return res;
-}
-
-module.exports.Response = Response;
-
-
-Object.setPrototypeOf(Request.prototype, http.IncomingMessage.prototype);
-Object.setPrototypeOf(Response.prototype, http.ServerResponse.prototype);
-
-
-
-
-Response.prototype.sendFile = function (fileName) {
-    let response = this;
-
-    return new Promise((resolve, reject) => {
-
-        let extname = fileName.slice(fileName.lastIndexOf('.'));
-        response.setHeader('Content-type', MIMES[extname]);
-
-        createReadStream(fileName)
-            .on('error', reject)
-            .on('finish', resolve)
-            .pipe(this);
-    });
-}
-
-Response.prototype.render = function (viewName, locals) {
-    let response = this;
-
-    response.setHeader('Content-type', 'text/html');
-    response.end(require('./views/' + viewName)(locals));
-}
-
-Response.prototype.redirect = function (path) {
-    let response = this;
-
-    response.statusCode = 302;
-    response.setHeader('Location', path);
-    response.end();
-}
-
-Response.prototype.cookie = function (cookieName, value, options = {}) {
-    let response = this;
-
-    let cookie = `${cookieName}=${value}; `;
-    cookie += Object.entries(options).map(([k, v]) => `${k}=${v}`).join('; ');
-
-    response.setHeader('Set-Cookie', cookie);
-}
-
-Response.prototype.removeCookie = function (cookieName) {
-    let response = this;
-
-    response.setHeader('Set-Cookie', cookieName + '=\'\'; expires=' + new Date(0));
-}
-
-
-Object.defineProperty(Request.prototype, 'body', {
-    get() {
-        let req = this;
-        let contentType = req.headers['content-type'];
-        return new Promise((resolve, reject) => {
-            let data = "";
-            req
-                .on('data', chunk => data += chunk)
-                .on('end', () => {
-                    if(contentType === 'application/x-www-form-urlencoded') {
-                        resolve(querystring.parse(data));
-                    } else if (contentType === 'application/json') {
-                        resolve(JSON.parse(data));
-                    }
-                })
-                .on('error', reject);
-        });
-    }
-});
 
 
 
@@ -141,7 +43,6 @@ module.exports.compose = function compose(fns) {
 
 
 
-
 // Used to web-scrape MIME types from https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 //
 // let table = document.querySelector('.standard-table');
@@ -158,7 +59,7 @@ module.exports.compose = function compose(fns) {
 //     return obj;
 // }, {});
 
-const MIMES = {
+const mimes = {
     ".aac": "audio/aac",
     ".abw": "application/x-abiword",
     ".arc": "application/x-freearc",
@@ -236,4 +137,4 @@ const MIMES = {
     ".3g2": "video/3gpp2",
     ".7z": "application/x-7z-compressed"
 };
-module.exports.MIMES = MIMES;
+module.exports.mimes = mimes;

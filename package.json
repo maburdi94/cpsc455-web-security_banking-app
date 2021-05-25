@@ -2,10 +2,8 @@
   "name": "assignment-2",
   "version": "1.0.0",
   "description": "- Express-like middleware - Handles url parameters - Handles querystring parameters - Handles all HTTP methods defined in Node http.METHODS - Support async/await",
-  "main": "app.js",
+  "main": "router.js",
   "scripts": {
-    "dev": "nodemon app.js -i services/db.json",
-    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

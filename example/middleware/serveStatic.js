@@ -1,6 +1,6 @@
 'use strict';
 
-const {MIMES} = require('./../utils');
+const {MIMES} = require('../../utils');
 const {createReadStream, statSync} = require('fs');
 
 

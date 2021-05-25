@@ -1,9 +1,9 @@
 'use strict';
 
-const Bank = require('./../services/bank');
-const {escapeHTML} = require('./../utils');
+const Bank = require('../services/bank');
+const {escapeHTML} = require('../../utils');
 
-const Router = require('./../router');
+const Router = require('../../router');
 const router = Router();
 
 

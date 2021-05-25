@@ -3,11 +3,11 @@
 const {readFileSync, writeFile} = require('fs');
 
 class Account {
-    constructor(accountId, name, type, amount) {
+    constructor({accountId, name, type, amount}) {
         this.accountId = accountId;
         this.name = name;
         this.type = type;
-        this.amount = amount;
+        this.amount = parseFloat(amount);
     }
 
     async withdraw(amount) {
@@ -30,7 +30,12 @@ class Account {
 
 
 class Customer {
-    constructor(customerId, username, password, accounts) {
+    customerId;
+    username;
+    password;
+    accounts;
+
+    constructor({customerId, username, password, accounts = []}) {
         this.customerId = customerId;
         this.username = username;
         this.password = password;
@@ -111,33 +116,19 @@ const bank = new Bank();
 
 // Load database
 Array.from(JSON.parse(readFileSync(__dirname + '/db.json', 'utf8')))
-    .forEach(obj => {
-        let {customerId, username, password, accounts} = obj;
-        let customer = new Customer(customerId, username, password, []);
+    .forEach((props) => {
+        let customer = new Customer(props);
 
-        customer.next_account_id = customerId * 1000 + 1;
+        customer.next_account_id = customer.customerId * 1000 + 1;
 
-        accounts.forEach(obj => {
-            let {accountId, name, type, amount} = obj;
-            let account = new Account(accountId, name, type, parseFloat(amount));
-
-            // get reference for saving
-            Object.defineProperty(account, 'customer', {
-                value: customer,
-            });
-
-            customer.accounts.push(account);
+        customer.accounts.forEach(props => {
+            let account = new Account(props);
 
             customer.next_account_id = Math.max(account.accountId + 1, customer.next_account_id);
         });
 
-        // get reference for saving
-        Object.defineProperty(customer, 'bank', {
-            value: bank,
-        });
-
         bank.customers.push(customer);
-        bank.next_customer_id = Math.max(bank.next_customer_id, customerId) + 1;
+        bank.next_customer_id = Math.max(bank.next_customer_id, customer.customerId) + 1;
     });
 
 

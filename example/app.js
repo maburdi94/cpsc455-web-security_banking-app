@@ -2,7 +2,7 @@
 
 const http = require('http');
 
-const Router = require('./router');
+const Router = require('./../router');
 const router = Router();
 
 // Routes

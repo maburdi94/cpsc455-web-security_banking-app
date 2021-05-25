@@ -1,6 +1,6 @@
 'use strict';
 
-const {escapeHTML} = require('./../utils');
+const {escapeHTML} = require('../../utils');
 
 module.exports = ({account: {accountId, name, amount, type}}) => `
     

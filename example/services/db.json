@@ -1,0 +1,40 @@
+[
+  {
+    "customerId": 1,
+    "username": "username",
+    "password": "password",
+    "accounts": [
+      {
+        "accountId": 1001,
+        "name": "Michael's Checking",
+        "type": "checking",
+        "amount": 150.00
+      },
+      {
+        "accountId": 1002,
+        "name": "Michael's Savings",
+        "type": "savings",
+        "amount": 100.00
+      }
+    ]
+  },
+  {
+    "customerId": 2,
+    "username": "maburdi",
+    "password": "password",
+    "accounts": [
+      {
+        "accountId": 2001,
+        "name": "First checking",
+        "type": "checking",
+        "amount": 90.05
+      },
+      {
+        "accountId": 2002,
+        "name": "First savings",
+        "type": "savings",
+        "amount": 16.60
+      }
+    ]
+  }
+]
