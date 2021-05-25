@@ -5,17 +5,21 @@
 - Handles querystring parameters
 - Handles all HTTP methods defined in Node http.METHODS
 - Support async/await
+- Support ES6 template string view rendering
+- Support using nested routers as middleware
+- Built-in JSON and FormData parsing of request body
+- Some basic middleware (authenticate, cookies, serveStatic, sessions)
 
-Only 52 SLOC (1.89 KB). 
-Compare to Express 857 SLOC (21.77KB) + dependencies!
 
 ## Example
 ```javascript
 const http = require('http');
-const fs = require('fs');
 
 const Router = require('./router');
 const router = Router();
+
+// A sub-router
+const accounts = require('./routes/accounts');
 
 const PORT = +process.env.PORT || 3000;
 
@@ -24,10 +28,6 @@ const server = http.createServer(router);
 
 router.use((request, response) => {
     console.log(request.method, request.url);
-});
-
-router.use((request, response) => {
-   response.writeHead(200, {'Content-Type': 'text/html'});
 });
 
 router.use('/test', (request, response) => {
@@ -43,8 +43,13 @@ router.use((request, response) => {
     });
 });
 
+
+// All requests beginning with /accounts get directed through this sub-router
+router.use('/accounts', accounts);
+
+
 router.get('/', (request, response) => {
-    response.end(fs.readFileSync(__dirname + '/index.html'));
+    response.sendFile(__dirname + '/index.html');
 });
 
 
@@ -58,11 +63,15 @@ router.get('/color/:favoriteColor', (request, response) => {
         <h1><span style='color: ${color}'>${color}</span> <span>${animal}</span></h1>
         <ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>
     `);
+    
+    // or using template views
+    // response.render('favorite_color');
 });
 
 router.post('/action', async (request, response) => {
-    response.end(await fs.promises.readFile(__dirname + '/result.html'));
+    response.sendFile(__dirname + '/result.html');
 });
+
 
 // Catch all GET
 router.get('', (request, response) => {
