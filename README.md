@@ -65,7 +65,7 @@ router.get('/color/:favoriteColor', (request, response) => {
     `);
     
     // or using template views
-    // response.render('favorite_color');
+    // response.render('favorite_color', {color, animal, items});
 });
 
 router.post('/action', async (request, response) => {
